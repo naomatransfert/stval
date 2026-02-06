@@ -29,7 +29,6 @@ body{
     overflow:hidden;
 }
 
-/* halo lumineux fond */
 .glow{
     position:absolute;
     inset:0;
@@ -40,7 +39,6 @@ body{
     z-index:-1;
 }
 
-/* carte principale */
 .container{
     position:relative;
     text-align:center;
@@ -121,7 +119,6 @@ button{
     transition:.25s;
 }
 
-/* bouton principal */
 #yes-btn,.start-btn{
     background:linear-gradient(135deg,var(--accent),var(--accent-soft));
     color:white;
@@ -132,7 +129,6 @@ button{
     transform:translateY(-2px) scale(1.03);
 }
 
-/* bouton non */
 #no-btn{
     background:#ffffff10;
     color:white;
@@ -173,7 +169,7 @@ button{
     <h1 id="title">Veux-tu être ma Valentine ?</h1>
     <div class="btn-group">
         <button id="yes-btn" onclick="celebrate()">OUI !</button>
-        <button id="no-btn" onmouseover="handleNo()">Non</button>
+        <button id="no-btn">Non</button>
     </div>
 </div>
 
@@ -203,6 +199,7 @@ function startExperience(){
     title.innerText=`Veux-tu être ma Valentine, ${userName} ?`;
 }
 
+// Fonction de fuite du bouton "Non"
 function handleNo(){
     noCount++;
 
@@ -235,6 +232,9 @@ function handleNo(){
     }
 }
 
+// Ajouter écouteur pour mobile
+noBtn.addEventListener('touchstart', handleNo);
+
 function celebrate(){
     mainCard.style.display='none';
     document.getElementById('final-msg').innerText=`Excellent choix, ${userName} !`;
@@ -249,6 +249,9 @@ function celebrate(){
         if(Date.now()<end)requestAnimationFrame(frame);
     })();
 }
+
+// Garder le comportement au survol pour desktop
+noBtn.addEventListener('mouseover', handleNo);
 </script>
 
 </body>
