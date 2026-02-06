@@ -1,0 +1,255 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>St Valentin Interactive</title>
+<script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.6.0/dist/confetti.browser.min.js"></script>
+
+<style>
+:root{
+    --accent:#ff4d8d;
+    --accent-soft:#ff9fc2;
+    --bg:#0f0f16;
+    --card:#ffffff10;
+    --border:#ffffff22;
+}
+
+*{box-sizing:border-box}
+
+body{
+    margin:0;
+    height:100vh;
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    font-family:'Inter',sans-serif;
+    background: radial-gradient(circle at 20% 20%, #2b0a2a, #0f0f16 60%);
+    color:white;
+    overflow:hidden;
+}
+
+/* halo lumineux fond */
+.glow{
+    position:absolute;
+    inset:0;
+    background:
+        radial-gradient(circle at 80% 20%, #ff4d8d22, transparent 40%),
+        radial-gradient(circle at 20% 80%, #8a5cff22, transparent 40%);
+    filter: blur(60px);
+    z-index:-1;
+}
+
+/* carte principale */
+.container{
+    position:relative;
+    text-align:center;
+    background:var(--card);
+    padding:3rem;
+    border-radius:28px;
+    border:1px solid var(--border);
+    backdrop-filter:blur(30px);
+    max-width:460px;
+    width:90%;
+    min-height:360px;
+    display:flex;
+    flex-direction:column;
+    align-items:center;
+    justify-content:center;
+    box-shadow:0 30px 80px rgba(0,0,0,0.5);
+    animation:fadeIn .6s ease;
+}
+
+@keyframes fadeIn{
+    from{opacity:0; transform:translateY(10px)}
+    to{opacity:1; transform:translateY(0)}
+}
+
+input{
+    background:#ffffff15;
+    border:1px solid #ffffff30;
+    padding:15px;
+    border-radius:14px;
+    color:white;
+    font-size:1rem;
+    width:85%;
+    margin-bottom:20px;
+    outline:none;
+    transition:.25s;
+}
+
+input:focus{
+    border-color:var(--accent);
+    box-shadow:0 0 0 2px #ff4d8d33;
+}
+
+.heart-icon{
+    font-size:64px;
+    margin-bottom:10px;
+    animation:float 2.5s ease-in-out infinite;
+}
+
+@keyframes float{
+    0%,100%{transform:translateY(0)}
+    50%{transform:translateY(-6px)}
+}
+
+h1{
+    font-size:1.7rem;
+    font-weight:900;
+    margin-bottom:28px;
+    background:linear-gradient(to bottom,#fff,#d6d6d6);
+    -webkit-background-clip:text;
+    -webkit-text-fill-color:transparent;
+}
+
+.btn-group{
+    display:flex;
+    gap:18px;
+    margin-top:20px;
+    flex-wrap:wrap;
+    justify-content:center;
+}
+
+button{
+    padding:14px 32px;
+    font-size:1rem;
+    font-weight:700;
+    border-radius:14px;
+    border:none;
+    cursor:pointer;
+    transition:.25s;
+}
+
+/* bouton principal */
+#yes-btn,.start-btn{
+    background:linear-gradient(135deg,var(--accent),var(--accent-soft));
+    color:white;
+    box-shadow:0 10px 25px #ff4d8d55;
+}
+
+#yes-btn:hover,.start-btn:hover{
+    transform:translateY(-2px) scale(1.03);
+}
+
+/* bouton non */
+#no-btn{
+    background:#ffffff10;
+    color:white;
+    border:1px solid #ffffff25;
+}
+
+#no-btn:hover{
+    background:#ffffff20;
+}
+
+.explode{
+    animation:explodeAnim .4s forwards;
+}
+
+@keyframes explodeAnim{
+    0%{transform:scale(1);opacity:1}
+    50%{transform:scale(1.8);filter:brightness(2) blur(2px);opacity:.8}
+    100%{transform:scale(0);opacity:0}
+}
+
+.hidden{display:none}
+</style>
+</head>
+
+<body>
+
+<div class="glow"></div>
+
+<div class="container" id="name-step">
+    <div class="heart-icon">💌</div>
+    <h1>Un message pour vous...</h1>
+    <input type="text" id="user-name" placeholder="Ton petit nom..." autocomplete="off">
+    <button class="start-btn" onclick="startExperience()">Continuer</button>
+</div>
+
+<div class="container hidden" id="main-card">
+    <div class="heart-icon" id="emoji">❤️</div>
+    <h1 id="title">Veux-tu être ma Valentine ?</h1>
+    <div class="btn-group">
+        <button id="yes-btn" onclick="celebrate()">OUI !</button>
+        <button id="no-btn" onmouseover="handleNo()">Non</button>
+    </div>
+</div>
+
+<div class="container hidden" id="success-card">
+    <div class="heart-icon">💍</div>
+    <h1 id="final-msg">Excellent choix</h1>
+    <p>Le 14 février sera légendaire.</p>
+</div>
+
+<script>
+let noCount=0;
+let yesScale=1;
+let userName="";
+
+const noBtn=document.getElementById('no-btn');
+const yesBtn=document.getElementById('yes-btn');
+const mainCard=document.getElementById('main-card');
+const title=document.getElementById('title');
+const emoji=document.getElementById('emoji');
+
+function startExperience(){
+    userName=document.getElementById('user-name').value.trim();
+    if(userName==="")userName="toi";
+
+    document.getElementById('name-step').classList.add('hidden');
+    mainCard.classList.remove('hidden');
+    title.innerText=`Veux-tu être ma Valentine, ${userName} ?`;
+}
+
+function handleNo(){
+    noCount++;
+
+    if(noCount<=6){
+        yesScale+=0.25;
+        yesBtn.style.transform=`scale(${yesScale})`;
+
+        const cardRect=mainCard.getBoundingClientRect();
+        const padding=30;
+
+        const newX=cardRect.left+Math.random()*(cardRect.width-noBtn.offsetWidth-padding);
+        const newY=cardRect.top+Math.random()*(cardRect.height-noBtn.offsetHeight-padding);
+
+        noBtn.style.position='fixed';
+        noBtn.style.left=`${newX}px`;
+        noBtn.style.top=`${newY}px`;
+
+        if(noCount===4)title.innerText="T'es sérieuse ?";
+    }
+
+    if(noCount===6){
+        title.innerText="Bon t'es relou là...";
+        emoji.innerText="😒";
+        noBtn.style.background="#ff4500";
+
+        setTimeout(()=>{
+            noBtn.classList.add('explode');
+            setTimeout(()=>{noBtn.style.visibility='hidden'},400);
+        },600);
+    }
+}
+
+function celebrate(){
+    mainCard.style.display='none';
+    document.getElementById('final-msg').innerText=`Excellent choix, ${userName} !`;
+    document.getElementById('success-card').classList.remove('hidden');
+
+    const end=Date.now()+3000;
+    const colors=['#ff4d8d','#ffffff','#ff9fc2'];
+
+    (function frame(){
+        confetti({particleCount:5,angle:60,spread:55,origin:{x:0},colors});
+        confetti({particleCount:5,angle:120,spread:55,origin:{x:1},colors});
+        if(Date.now()<end)requestAnimationFrame(frame);
+    })();
+}
+</script>
+
+</body>
+</html>
